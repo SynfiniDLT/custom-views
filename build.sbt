@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 import com.daml.projection.DamlCodegen
 
+import sbt.project
+import sbtassembly.MergeStrategy
+
 scalaVersion := "2.13.8"
 // Overrides sbt-dynver version
 version := sys.env.get("VERSION").getOrElse("LOCAL-SNAPSHOT")
@@ -169,3 +172,18 @@ lazy val projection = (project in file("."))
 lazy val PerfTest = config("perf").extend(Test)
 def perfFilter(name: String): Boolean = name.endsWith("PerfSpec")
 def unitFilter(name: String): Boolean = (name.endsWith("Spec")) && !perfFilter(name)
+
+
+assemblyMergeStrategy in assembly := {
+  case "META-INF/LICENSE" => MergeStrategy.rename
+  case "META-INF/license" => MergeStrategy.rename
+  case "META-INF/NOTICE.txt" => MergeStrategy.rename
+  case "META-INF/LICENSE.txt" => MergeStrategy.rename
+  case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+  case "application.conf" => MergeStrategy.concat
+  case "reference.conf" => MergeStrategy.concat
+  case PathList("META-INF", xs) if xs.toLowerCase.endsWith(".dsa") => MergeStrategy.discard
+  case PathList("META-INF", xs) if xs.toLowerCase.endsWith(".rsa") => MergeStrategy.discard
+  case PathList("META-INF", xs) if xs.toLowerCase.endsWith(".sf") => MergeStrategy.discard
+  case _ => MergeStrategy.first
+}
